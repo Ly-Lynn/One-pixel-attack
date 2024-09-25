@@ -13,16 +13,16 @@ Added by Andrew Nelson 2014
 from __future__ import division, print_function, absolute_import
 import numpy as np
 from scipy.optimize import OptimizeResult, minimize
-from scipy.optimize.optimize import _status_message
+# from scipy.optimize.optimize import _status_message
 from scipy._lib._util import check_random_state
-from scipy._lib.six import xrange, string_types
+# from scipy._lib.six import xrange, string_types
 import warnings
 
 
 __all__ = ['differential_evolution']
 
 _MACHEPS = np.finfo(np.float64).eps
-
+string_types = (str,) 
 
 def differential_evolution(func, bounds, args=(), strategy='best1bin',
                            maxiter=1000, popsize=15, tol=0.01,
@@ -552,7 +552,8 @@ class DifferentialEvolutionSolver(object):
             then OptimizeResult also contains the ``jac`` attribute.
         """
         nit, warning_flag = 0, False
-        status_message = _status_message['success']
+        # status_message = _status_message['success']
+        status_message = 'success'
 
         # The population may have just been initialized (all entries are
         # np.inf). If it has you have to calculate the initial energies.
@@ -563,13 +564,14 @@ class DifferentialEvolutionSolver(object):
             self._calculate_population_energies()
 
         # do the optimisation.
-        for nit in xrange(1, self.maxiter + 1):
+        for nit in range(1, self.maxiter + 1):
             # evolve the population by a generation
             try:
                 next(self)
             except StopIteration:
                 warning_flag = True
-                status_message = _status_message['maxfev']
+                # status_message = _status_message['maxfev']
+                status_message = 'Maximum number of function evaluations has been exceeded.'
                 break
 
             if self.disp:
@@ -596,7 +598,8 @@ class DifferentialEvolutionSolver(object):
                 break
 
         else:
-            status_message = _status_message['maxiter']
+            # status_message = _status_message['maxiter']
+            status_message = 'Maximum number of iterations has been exceeded.'
             warning_flag = True
 
         DE_result = OptimizeResult(

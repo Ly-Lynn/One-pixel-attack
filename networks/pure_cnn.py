@@ -5,10 +5,10 @@ import keras
 from keras.models import Sequential
 from keras.optimizers import Adam, SGD
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler, TensorBoard
-from keras.constraints import maxnorm
+from tensorflow.keras.constraints import MaxNorm
 from keras.models import load_model
 from keras.layers import GlobalAveragePooling2D, Lambda, Conv2D, MaxPooling2D, Dropout, Dense, Flatten, Activation
-from keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from keras.datasets import cifar10
 
 from networks.train_plot import PlotLearning
