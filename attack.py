@@ -22,6 +22,8 @@ import helper
 
 import numpy as np
 import torch
+import torch.nn as nn
+
 class ModelWrapper:
     def __init__(self, model, framework='pytorch', name=None, use_data_parallel=True):
         self.framework = framework.lower()
