@@ -23,7 +23,7 @@ import helper
 import numpy as np
 import torch
 class ModelWrapper:
-    def __init__(self, model, framework='pytorch', name=None, use_data_parallel=False):
+    def __init__(self, model, framework='pytorch', name=None, use_data_parallel=True):
         self.framework = framework.lower()
         if self.framework not in ['pytorch', 'tensorflow']:
             raise ValueError("Unsupported framework. Use 'pytorch' or 'tensorflow'.")
