@@ -23,12 +23,25 @@ import helper
 import numpy as np
 import torch
 class ModelWrapper:
-    def __init__(self, model, framework='pytorch', name=None):
-        self.model = model
+    def __init__(self, model, framework='pytorch', name=None, use_data_parallel=False):
         self.framework = framework.lower()
         if self.framework not in ['pytorch', 'tensorflow']:
             raise ValueError("Unsupported framework. Use 'pytorch' or 'tensorflow'.")
+        
+        self.use_data_parallel = use_data_parallel
+        if self.framework == 'pytorch' and self.use_data_parallel:
+            if torch.cuda.device_count() > 1:
+                print(f"Using {torch.cuda.device_count()} GPUs!")
+                self.model = nn.DataParallel(model)
+            else:
+                print("Only one GPU available. DataParallel not used.")
+                self.model = model
+        else:
+            self.model = model
+        
         self.name = name or (model.name if hasattr(model, 'name') else 'UnnamedModel')
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.to_device(self.device)
 
     def predict(self, inputs):
         if self.framework == 'tensorflow':
