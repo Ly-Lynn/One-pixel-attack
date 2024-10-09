@@ -20,11 +20,61 @@ from networks.capsnet import CapsNet
 from differential_evolution import differential_evolution
 import helper
 
+import numpy as np
+
+class ModelWrapper:
+    def __init__(self, model, framework='pytorch', name=None):
+        self.model = model
+        self.framework = framework.lower()
+        if self.framework not in ['pytorch', 'tensorflow']:
+            raise ValueError("Unsupported framework. Use 'pytorch' or 'tensorflow'.")
+        self.name = name or (model.name if hasattr(model, 'name') else 'UnnamedModel')
+
+    def predict(self, inputs):
+        if self.framework == 'tensorflow':
+            return self.model.predict(inputs)
+        elif self.framework == 'pytorch':
+            self.model.eval()
+            with torch.no_grad():
+                inputs = inputs.transpose((0, 3, 1, 2))  # NHWC to NCHW
+                inputs_tensor = torch.from_numpy(inputs).float().to('cuda')
+                inputs_tensor = inputs_tensor / 255.0  # Scale to (0, 1)
+                print(inputs_tensor)
+                outputs = self.model(inputs_tensor)
+                return outputs.cpu().numpy()  # shape: (samples, classes)
+    def count_params(self):
+        if self.framework == 'tensorflow':
+            return self.model.count_params()
+        elif self.framework == 'pytorch':
+            return sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+
+    def to_device(self, device):
+        if self.framework == 'pytorch':
+            import torch
+            self.model = self.model.to(device)
+        return self
+    def __getattr__(self, attr):
+        return getattr(self.model, attr)
+
+    def __call__(self, *args, **kwargs):
+        return self.model(*args, **kwargs)
+
+    def __repr__(self):
+        return self.model.__repr__()
+
+    def __str__(self):
+        return self.model.__str__()
+
+    def __getattr__(self, attr):
+        return getattr(self.model, attr)
+
+def create_model_wrapper(model, framework='pytorch', name=None):
+    return ModelWrapper(model, framework, name)
 
 class PixelAttacker:
     def __init__(self, models, data, class_names, dimensions=(32, 32)):
         # Load data and model
-        self.models = models
+        self.models = models # ModelWrapper(models)
         self.x_test, self.y_test = data
         self.class_names = class_names
         self.dimensions = dimensions
@@ -94,8 +144,17 @@ class PixelAttacker:
         if plot:
             helper.plot_image(attack_image, actual_class, self.class_names, predicted_class)
 
-        return [model.name, pixel_count, img_id, actual_class, predicted_class, success, cdiff, prior_probs,
-                predicted_probs, attack_result.x]
+        return [
+                model.name, 
+                pixel_count, 
+                img_id, 
+                actual_class, 
+                predicted_class, 
+                success, 
+                cdiff, 
+                prior_probs,
+                predicted_probs, 
+                attack_result.x]
 
     def attack_all(self, models, samples=500, pixels=(1, 3, 5), targeted=False,
                    maxiter=75, popsize=400, verbose=False):

@@ -554,7 +554,7 @@ class DifferentialEvolutionSolver(object):
         nit, warning_flag = 0, False
         # status_message = _status_message['success']
         status_message = 'success'
-
+        
         # The population may have just been initialized (all entries are
         # np.inf). If it has you have to calculate the initial energies.
         # Although this is also done in the evolve generator it's possible
