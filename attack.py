@@ -21,7 +21,7 @@ from differential_evolution import differential_evolution
 import helper
 
 import numpy as np
-
+import torch
 class ModelWrapper:
     def __init__(self, model, framework='pytorch', name=None):
         self.model = model
