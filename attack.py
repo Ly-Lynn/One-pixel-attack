@@ -87,13 +87,13 @@ def create_model_wrapper(model, framework='pytorch', name=None):
     return ModelWrapper(model, framework, name)
 
 class PixelAttacker:
-    def __init__(self, models, data, class_names, dimensions=(32, 32)):
+    def __init__(self, models, label, data, class_names, dimensions=(32, 32)):
         # Load data and model
         self.models = models # ModelWrapper(models)
         self.x_test, self.y_test = data
         self.class_names = class_names
         self.dimensions = dimensions
-
+        self.label = label
         network_stats, correct_imgs = helper.evaluate_models(self.models, self.x_test, self.y_test)
         self.correct_imgs = pd.DataFrame(correct_imgs, columns=['name', 'img', 'label', 'confidence', 'pred'])
         self.network_stats = pd.DataFrame(network_stats, columns=['name', 'accuracy', 'param_count'])
@@ -154,7 +154,7 @@ class PixelAttacker:
         actual_class = self.y_test[img_id, 0]
         success = predicted_class != actual_class
         cdiff = prior_probs[actual_class] - predicted_probs[actual_class]
-
+        label = self.label[img_id, 0]
         # Show the best attempt at a solution (successful or not)
         if plot:
             helper.plot_image(attack_image, actual_class, self.class_names, predicted_class)
@@ -163,6 +163,7 @@ class PixelAttacker:
                 model.name, 
                 pixel_count, 
                 img_id, 
+                label,
                 actual_class, 
                 predicted_class, 
                 success, 
