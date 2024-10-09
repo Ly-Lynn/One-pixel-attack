@@ -39,7 +39,7 @@ class ModelWrapper:
                 inputs = inputs.transpose((0, 3, 1, 2))  # NHWC to NCHW
                 inputs_tensor = torch.from_numpy(inputs).float().to('cuda')
                 inputs_tensor = inputs_tensor / 255.0  # Scale to (0, 1)
-                print(inputs_tensor)
+                # print(inputs_tensor)
                 outputs = self.model(inputs_tensor)
                 return outputs.cpu().numpy()  # shape: (samples, classes)
     def count_params(self):
